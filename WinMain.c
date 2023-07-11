@@ -2,7 +2,6 @@
 #include <pathcch.h>
 #include <shlwapi.h>
 #include <wtsapi32.h>
-#include <stdio.h>
 
 typedef struct HOTKEYS
 {
@@ -40,13 +39,12 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nC
     {
         INT iCount;
         WCHAR **szFileNames,
-            **szArguments, **szProcessNames;
-        UINT *uModifiers;
-        UINT *uVks;
+            **szArguments;
+        UINT *uModifiers,
+            *uVks;
     } htHotKeys = {.iCount = 0,
                    .szFileNames = NULL,
                    .szArguments = NULL,
-                   .szProcessNames = NULL,
                    .uModifiers = NULL,
                    .uVks = NULL};
 
@@ -57,7 +55,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nC
     RegisterHotKey(NULL, 1, MOD_WIN | MOD_ALT | MOD_NOREPEAT, 0x45);
     RegisterHotKey(NULL, 2, MOD_WIN | MOD_ALT | MOD_NOREPEAT, 0x53);
     RegisterHotKey(NULL, 3, MOD_WIN | MOD_ALT, 0x43);
-RegisterHotKey(NULL, 4, MOD_WIN | MOD_ALT, 0x50);
+    RegisterHotKey(NULL, 4, MOD_WIN | MOD_ALT, 0x50);
 
     do
     {
@@ -76,9 +74,6 @@ RegisterHotKey(NULL, 4, MOD_WIN | MOD_ALT, 0x50);
         htHotKeys.uModifiers = realloc(htHotKeys.uModifiers, sizeof(UINT) * htHotKeys.iCount);
         htHotKeys.uVks = realloc(htHotKeys.uVks, sizeof(UINT) * htHotKeys.iCount);
         htHotKeys.szFileNames[htHotKeys.iCount - 1] = wcslwr(GetPrivateProfileStringAllocW(lpszSection, L"FileName", L"\0", lpFileName));
-        htHotKeys.szProcessNames[htHotKeys.iCount - 1] = malloc(sizeof(WCHAR) * (wcslen(htHotKeys.szFileNames[htHotKeys.iCount - 1]) + 1));
-        wcscpy(htHotKeys.szProcessNames[htHotKeys.iCount - 1], htHotKeys.szFileNames[htHotKeys.iCount - 1]);
-        PathStripPathW(htHotKeys.szProcessNames[htHotKeys.iCount - 1]);
         htHotKeys.szArguments[htHotKeys.iCount - 1] = GetPrivateProfileStringAllocW(lpszSection, L"Arguments", L"", lpFileName);
         htHotKeys.uModifiers[htHotKeys.iCount - 1] = (GetPrivateProfileIntW(lpszSection, L"ModAlt", 0, lpFileName)
                                                           ? MOD_ALT
@@ -96,11 +91,8 @@ RegisterHotKey(NULL, 4, MOD_WIN | MOD_ALT, 0x50);
         htHotKeys.uVks[htHotKeys.iCount - 1] = wcslen(lpReturnedString) ? VkKeyScanW(lpReturnedString[0]) : -1;
         free(lpReturnedString);
         if (htHotKeys.uModifiers[htHotKeys.iCount - 1] ||
-            htHotKeys.uVks[htHotKeys.iCount - 1] != -1 ||
-            !PathIsRelativeW(htHotKeys.szFileNames[iCount - 1]))
-        {
+            htHotKeys.uVks[htHotKeys.iCount - 1] != -1)
             RegisterHotKey(0, htHotKeys.iCount + 4, htHotKeys.uModifiers[htHotKeys.iCount - 1] | MOD_NOREPEAT, htHotKeys.uVks[htHotKeys.iCount - 1]);
-        }
         lpszSection += wcslen(lpszSection) + 1;
     }
     free(lpszSections);
@@ -141,13 +133,9 @@ RegisterHotKey(NULL, 4, MOD_WIN | MOD_ALT, 0x50);
                 break;
             }
         for (INT iIndex = 0; iIndex < htHotKeys.iCount; iIndex++)
-        {
             if (htHotKeys.uModifiers[iIndex] == uModifiers &&
                 htHotKeys.uVks[iIndex] == uVk)
-            {
                 ShellExecuteW(NULL, NULL, htHotKeys.szFileNames[iIndex], htHotKeys.szArguments[iIndex], NULL, SW_SHOWNORMAL);
-            };
-        }
     }
     return 0;
 }
