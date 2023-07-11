@@ -87,11 +87,13 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nC
         htHotKeys.uVks = realloc(htHotKeys.uVks, sizeof(UINT) * htHotKeys.iCount);
 
         htHotKeys.szFileNames[htHotKeys.iCount - 1] = _wcslwr(GetPrivateProfileStringAllocW(lpszSection, L"FileName", L"\0", lpFileName));
+         htHotKeys.szArguments[htHotKeys.iCount - 1] = GetPrivateProfileStringAllocW(lpszSection, L"Arguments", L"\0", lpFileName);
+        htHotKeys.bToggles[htHotKeys.iCount - 1] = GetPrivateProfileIntW(lpszSection, L"Toggle", 0, lpFileName);
+       
         htHotKeys.szProcessNames[htHotKeys.iCount - 1] = malloc(sizeof(WCHAR) * (wcslen(htHotKeys.szFileNames[htHotKeys.iCount - 1]) + 1));
         wcscpy(htHotKeys.szProcessNames[htHotKeys.iCount - 1], htHotKeys.szFileNames[htHotKeys.iCount - 1]);
         PathStripPathW(htHotKeys.szProcessNames[htHotKeys.iCount - 1]);
-        htHotKeys.szArguments[htHotKeys.iCount - 1] = GetPrivateProfileStringAllocW(lpszSection, L"Arguments", L"\0", lpFileName);
-        htHotKeys.bToggles[htHotKeys.iCount - 1] = GetPrivateProfileIntW(lpszSection, L"Toggle", 0, lpFileName);
+      
         htHotKeys.uModifiers[htHotKeys.iCount - 1] = (GetPrivateProfileIntW(lpszSection, L"ModAlt", 0, lpFileName)
                                                           ? MOD_ALT
                                                           : 0) |
@@ -109,6 +111,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nC
         if (htHotKeys.uModifiers[htHotKeys.iCount - 1] ||
             htHotKeys.uVks[htHotKeys.iCount - 1] != -1)
             RegisterHotKey(0, htHotKeys.iCount, htHotKeys.uModifiers[htHotKeys.iCount - 1] | MOD_NOREPEAT, htHotKeys.uVks[htHotKeys.iCount - 1]);
+       
         lpszSection += wcslen(lpszSection) + 1;
     }
     free(lpszSections);
