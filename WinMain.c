@@ -91,7 +91,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nC
         wcscpy(htHotKeys.szProcessNames[htHotKeys.iCount - 1], htHotKeys.szFileNames[htHotKeys.iCount - 1]);
         PathStripPathW(htHotKeys.szProcessNames[htHotKeys.iCount - 1]);
         htHotKeys.szArguments[htHotKeys.iCount - 1] = GetPrivateProfileStringAllocW(lpszSection, L"Arguments", L"\0", lpFileName);
-        htHotKeys.bToggles[htHotKeys.iCount - 1] = GetPrivateProfileIntW(lpszSection, L"Toggle", 1, lpFileName);
+        htHotKeys.bToggles[htHotKeys.iCount - 1] = GetPrivateProfileIntW(lpszSection, L"Toggle", 0, lpFileName);
         htHotKeys.uModifiers[htHotKeys.iCount - 1] = (GetPrivateProfileIntW(lpszSection, L"ModAlt", 0, lpFileName)
                                                           ? MOD_ALT
                                                           : 0) |
@@ -104,9 +104,8 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nC
                                                      (GetPrivateProfileIntW(lpszSection, L"ModControl", 0, lpFileName)
                                                           ? MOD_CONTROL
                                                           : 0);
-        lpReturnedString = GetPrivateProfileStringAllocW(lpszSection, L"HotKey", 0, lpFileName);
-        htHotKeys.uVks[htHotKeys.iCount - 1] = wcslen(lpReturnedString) ? VkKeyScanW(lpReturnedString[0]) : -1;
-        free(lpReturnedString);
+
+        htHotKeys.uVks[htHotKeys.iCount - 1] = wcslen(lpszSection) ? VkKeyScanW(_wcslwr(lpszSection)[0]) : -1;
         if (htHotKeys.uModifiers[htHotKeys.iCount - 1] ||
             htHotKeys.uVks[htHotKeys.iCount - 1] != -1)
             RegisterHotKey(0, htHotKeys.iCount, htHotKeys.uModifiers[htHotKeys.iCount - 1] | MOD_NOREPEAT, htHotKeys.uVks[htHotKeys.iCount - 1]);
@@ -123,7 +122,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nC
         for (INT iIndex = 0; iIndex < htHotKeys.iCount; iIndex++)
             if (htHotKeys.uModifiers[iIndex] == uModifiers &&
                 htHotKeys.uVks[iIndex] == uVk)
-                if (htHotKeys.bToggles[iIndex] ? !IsProcessSingleInstanceW(htHotKeys.szProcessNames[htHotKeys.iCount - 1]) : TRUE)
+                if (htHotKeys.bToggles[iIndex] ? !IsProcessSingleInstanceW(htHotKeys.szFileNames[iIndex]) : TRUE)
                     ShellExecuteW(NULL, NULL, htHotKeys.szFileNames[iIndex], htHotKeys.szArguments[iIndex], NULL, SW_SHOWNORMAL);
     }
     return 0;
