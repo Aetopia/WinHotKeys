@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <pathcch.h>
 #include <wtsapi32.h>
+#include <shlwapi.h>
 
 WCHAR *GetPrivateProfileStringAllocW(LPCWSTR lpAppName, LPCWSTR lpKeyName, LPCWSTR lpDefault, LPCWSTR lpFileName)
 {
@@ -12,6 +13,27 @@ WCHAR *GetPrivateProfileStringAllocW(LPCWSTR lpAppName, LPCWSTR lpKeyName, LPCWS
         GetPrivateProfileStringW(lpAppName, lpKeyName, lpDefault, lpReturnedString, nSize, lpFileName);
     } while (GetLastError() == ERROR_MORE_DATA);
     return lpReturnedString;
+}
+
+BOOL IsProcessSingleInstanceW(WCHAR *lpProcessName)
+{
+    WTS_PROCESS_INFOW *pProcessInfo = NULL;
+    DWORD dwCount = 0;
+    BOOL bRunning = FALSE;
+    HANDLE hProcess = 0;
+    WTSEnumerateProcessesW(WTS_CURRENT_SERVER, 0, 1, &pProcessInfo, &dwCount);
+    for (DWORD dwIndex = 0; dwIndex < dwCount; dwIndex++)
+    {
+        if (!wcscmp(lpProcessName, _wcslwr(pProcessInfo[dwIndex].pProcessName)))
+        {
+            bRunning = TRUE;
+            hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pProcessInfo[dwIndex].ProcessId);
+            TerminateProcess(hProcess, 1);
+            CloseHandle(hProcess);
+        }
+    }
+    WTSFreeMemory(pProcessInfo);
+    return bRunning;
 }
 
 INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nCmdShow)
@@ -29,23 +51,22 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nC
     {
         INT iCount;
         WCHAR **szFileNames,
-            **szArguments;
+            **szArguments,
+            **szProcessNames;
+        BOOL *bToggles;
         UINT *uModifiers,
             *uVks;
     } htHotKeys = {.iCount = 0,
                    .szFileNames = NULL,
                    .szArguments = NULL,
                    .uModifiers = NULL,
+                   .szProcessNames = NULL,
+                   .bToggles = NULL,
                    .uVks = NULL};
 
     wcscpy(lpFileName, pszArgvW[0]);
     PathCchRemoveFileSpec(lpFileName, wcslen(lpFileName));
     wcscat(lpFileName, L"\\WinHotKeys.ini");
-
-    RegisterHotKey(NULL, 1, MOD_WIN | MOD_ALT | MOD_NOREPEAT, 0x45);
-    RegisterHotKey(NULL, 2, MOD_WIN | MOD_ALT | MOD_NOREPEAT, 0x53);
-    RegisterHotKey(NULL, 3, MOD_WIN | MOD_ALT, 0x43);
-    RegisterHotKey(NULL, 4, MOD_WIN | MOD_ALT, 0x50);
 
     do
     {
@@ -60,11 +81,17 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nC
         htHotKeys.iCount++;
         htHotKeys.szFileNames = realloc(htHotKeys.szFileNames, sizeof(WCHAR *) * htHotKeys.iCount);
         htHotKeys.szArguments = realloc(htHotKeys.szArguments, sizeof(WCHAR *) * htHotKeys.iCount);
-        htHotKeys.szProcessNames = realloc(htHotKeys.szArguments, sizeof(WCHAR *) * htHotKeys.iCount);
+        htHotKeys.szProcessNames = realloc(htHotKeys.szProcessNames, sizeof(WCHAR *) * htHotKeys.iCount);
+        htHotKeys.bToggles = realloc(htHotKeys.bToggles, sizeof(BOOL) * htHotKeys.iCount);
         htHotKeys.uModifiers = realloc(htHotKeys.uModifiers, sizeof(UINT) * htHotKeys.iCount);
         htHotKeys.uVks = realloc(htHotKeys.uVks, sizeof(UINT) * htHotKeys.iCount);
-        htHotKeys.szFileNames[htHotKeys.iCount - 1] = wcslwr(GetPrivateProfileStringAllocW(lpszSection, L"FileName", L"\0", lpFileName));
-        htHotKeys.szArguments[htHotKeys.iCount - 1] = GetPrivateProfileStringAllocW(lpszSection, L"Arguments", L"", lpFileName);
+
+        htHotKeys.szFileNames[htHotKeys.iCount - 1] = _wcslwr(GetPrivateProfileStringAllocW(lpszSection, L"FileName", L"\0", lpFileName));
+        htHotKeys.szProcessNames[htHotKeys.iCount - 1] = malloc(sizeof(WCHAR) * (wcslen(htHotKeys.szFileNames[htHotKeys.iCount - 1]) + 1));
+        wcscpy(htHotKeys.szProcessNames[htHotKeys.iCount - 1], htHotKeys.szFileNames[htHotKeys.iCount - 1]);
+        PathStripPathW(htHotKeys.szProcessNames[htHotKeys.iCount - 1]);
+        htHotKeys.szArguments[htHotKeys.iCount - 1] = GetPrivateProfileStringAllocW(lpszSection, L"Arguments", L"\0", lpFileName);
+        htHotKeys.bToggles[htHotKeys.iCount - 1] = GetPrivateProfileIntW(lpszSection, L"Toggle", 1, lpFileName);
         htHotKeys.uModifiers[htHotKeys.iCount - 1] = (GetPrivateProfileIntW(lpszSection, L"ModAlt", 0, lpFileName)
                                                           ? MOD_ALT
                                                           : 0) |
@@ -82,7 +109,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nC
         free(lpReturnedString);
         if (htHotKeys.uModifiers[htHotKeys.iCount - 1] ||
             htHotKeys.uVks[htHotKeys.iCount - 1] != -1)
-            RegisterHotKey(0, htHotKeys.iCount + 4, htHotKeys.uModifiers[htHotKeys.iCount - 1] | MOD_NOREPEAT, htHotKeys.uVks[htHotKeys.iCount - 1]);
+            RegisterHotKey(0, htHotKeys.iCount, htHotKeys.uModifiers[htHotKeys.iCount - 1] | MOD_NOREPEAT, htHotKeys.uVks[htHotKeys.iCount - 1]);
         lpszSection += wcslen(lpszSection) + 1;
     }
     free(lpszSections);
@@ -93,39 +120,11 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nC
         UINT uModifiers = LOWORD(msg.lParam),
              uVk = HIWORD(msg.lParam);
 
-        if (uModifiers == MOD_WIN | MOD_ALT)
-            switch (uVk)
-            {
-            case 0x45:
-                HWND hWnd = 0;
-                DWORD dwProcessId = 0;
-                HANDLE hProcess = 0;
-                if (!(hWnd = GetShellWindow()))
-                    ShellExecuteW(NULL, NULL, L"C:\\Windows\\explorer.exe", NULL, L"C:\\Windows", SW_SHOWNORMAL);
-                else
-                {
-                    GetWindowThreadProcessId(hWnd, &dwProcessId);
-                    hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, dwProcessId);
-                    TerminateProcess(hProcess, 1);
-                    CloseHandle(hProcess);
-                }
-                break;
-            case 0x53:
-                ShellExecuteW(NULL, NULL, L"C:\\Windows\\System32\\snippingtool.exe", L"/clip", L"C:\\Windows\\System32", SW_SHOWNORMAL);
-                break;
-
-            case 0x43:
-                ShellExecuteW(NULL, NULL, L"C:\\Windows\\System32\\cmd.exe", NULL, L"C:\\Windows\\System32", SW_SHOWNORMAL);
-                break;
-
-            case 0x50:
-                ShellExecuteW(NULL, NULL, L"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", NULL, L"C:\\Windows\\System32\\WindowsPowerShell\\v1.0", SW_SHOWNORMAL);
-                break;
-            }
         for (INT iIndex = 0; iIndex < htHotKeys.iCount; iIndex++)
             if (htHotKeys.uModifiers[iIndex] == uModifiers &&
                 htHotKeys.uVks[iIndex] == uVk)
-                ShellExecuteW(NULL, NULL, htHotKeys.szFileNames[iIndex], htHotKeys.szArguments[iIndex], NULL, SW_SHOWNORMAL);
+                if (htHotKeys.bToggles[iIndex] ? !IsProcessSingleInstanceW(htHotKeys.szProcessNames[htHotKeys.iCount - 1]) : TRUE)
+                    ShellExecuteW(NULL, NULL, htHotKeys.szFileNames[iIndex], htHotKeys.szArguments[iIndex], NULL, SW_SHOWNORMAL);
     }
     return 0;
 }
