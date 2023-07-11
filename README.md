@@ -1,5 +1,5 @@
 # WinHotKeys
-Assign hotkeys to launch specific programs.
+Launch specific programs with custom hotkeys.
 
 # Usage
 1. Download the latest release.
