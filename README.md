@@ -2,7 +2,7 @@
 Launch specific programs with custom hotkeys.
 
 # Usage
-1. Download the latest release.
+1. Download the latest release from [GitHub Releases](https://github.com/Aetopia/WinHotKeys/releases/latest).
 2. Create a new file called `WinHotKeys.ini` in the same directory where `WinHotKeys.exe` is present.
     - Configuration File Reference:    
         Create a new section with the character to be used a hotkey.
