@@ -8,12 +8,12 @@ Launch specific programs with custom hotkeys.
         Create a new section with the character to be used a hotkey.
         |Key|Configration|
         |-|-|
-        |`FileName = <Path to File>`|Point to the file to be launched.|
-        |`ModWin = <0: Disabled \| 1: Enabled>`|Use the Windows key as a hotkey modifier.|
-        |`ModAlt = <0: Disabled \| 1: Enabled>`|Use the Alt key as a hotkey modifier.|
-        |`ModControl = <0: Disabled \| 1: Enabled>`|Use the Control key as a hotkey modifier.|
-        |`ModShift = <0: Disabled \| 1: Enabled>`|Use the Shift key as a hotkey modifier.|
-        |`Toggle = <0: Disabled \| 1: Enabled>`|Make the hotkey a toggle.<br>When theh hotkey is pressed it will kill any running instances of the file to be launched, if no running instances exist then the file is launched.|
+        |`FileName`<br>`<Path to File>`|Point to the file to be launched.|
+        |`ModWin`<br>`<0: Disabled \| 1: Enabled>`|Use the Windows key as a hotkey modifier.|
+        |`ModAlt`<br>`<0: Disabled \| 1: Enabled>`|Use the Alt key as a hotkey modifier.|
+        |`ModControl`<br>`<0: Disabled \| 1: Enabled>`|Use the Control key as a hotkey modifier.|
+        |`ModShift`<br>`<0: Disabled \| 1: Enabled>`|Use the Shift key as a hotkey modifier.|
+        |`Toggle`<br>`<0: Disabled \| 1: Enabled>`|Make the hotkey a toggle.<br>When theh hotkey is pressed it will kill any running instances of the file to be launched, if no running instances exist then the file is launched.|
     - Example 
 
         ```ini
