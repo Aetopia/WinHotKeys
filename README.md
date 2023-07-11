@@ -4,7 +4,7 @@ Launch specific programs with custom hotkeys.
 # Usage
 1. Download the latest release.
 2. Create a new file called `WinHotKeys.ini` in the same directory where `WinHotKeys.exe` is present.
-    - Configuration File Reference:
+    - Configuration File Reference:    
         Create a new section with the character to be used a hotkey.
         |Key|Configration|
         |-|-|
@@ -13,7 +13,8 @@ Launch specific programs with custom hotkeys.
         |ModAlt|Use the Alt key as a hotkey modifier.|
         |ModControl|Use the Control key as a hotkey modifier.|
         |ModShift|Use the Shift key as a hotkey modifier.|
-    - Example
+    - Example 
+    
         ```ini
         [e]
         FileName = explorer.exe
