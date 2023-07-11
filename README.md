@@ -9,6 +9,7 @@ Launch specific programs with custom hotkeys.
         |Key|Configration|
         |-|-|
         |`FileName`|`<Path to File>` \| Point to the file to be launched.|
+        |`Arguments`|`<File Arguments>` \| Arguments to be passed to the file to be launched.|
         |`ModWin`|`<0: Disabled \| 1: Enabled>` \| Use the Windows key as a hotkey modifier.|
         |`ModAlt`|`<0: Disabled \| 1: Enabled>` \| Use the Alt key as a hotkey modifier.|
         |`ModControl`|`<0: Disabled \| 1: Enabled>` \| Use the Control key as a hotkey modifier.|
