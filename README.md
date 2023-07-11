@@ -13,7 +13,7 @@ Launch specific programs with custom hotkeys.
         |`ModAlt`|`<0: Disabled \| 1: Enabled>` \| Use the Alt key as a hotkey modifier.|
         |`ModControl`|`<0: Disabled \| 1: Enabled>` \| Use the Control key as a hotkey modifier.|
         |`ModShift`|`<0: Disabled \| 1: Enabled>` \| Use the Shift key as a hotkey modifier.|
-        |`Toggle`|`<0: Disabled \| 1: Enabled>` \| Make the hotkey a toggle.<br>When theh hotkey is pressed it will kill any running instances of the file to be launched, if no running instances exist then the file is launched.|
+        |`Toggle`|`<0: Disabled \| 1: Enabled>` \| Make the hotkey a toggle.<br>When the hotkey is pressed it will kill any running instances of the file to be launched, if no running instances exist then the file is launched.|
     - Example 
 
         ```ini
