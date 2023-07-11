@@ -1,16 +1,6 @@
 #include <windows.h>
 #include <pathcch.h>
-#include <shlwapi.h>
 #include <wtsapi32.h>
-
-typedef struct HOTKEYS
-{
-    WCHAR **szFileNames,
-        **szArguments, **szProcessNames;
-    UINT *uModifiers;
-    UINT *uVk;
-    BOOL *bSingleInstance;
-} HOTKEYS;
 
 WCHAR *GetPrivateProfileStringAllocW(LPCWSTR lpAppName, LPCWSTR lpKeyName, LPCWSTR lpDefault, LPCWSTR lpFileName)
 {
