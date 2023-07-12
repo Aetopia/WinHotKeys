@@ -4,15 +4,15 @@ Launch specific programs with custom hotkeys.
 # Usage
 1. Download the latest release from [GitHub Releases](https://github.com/Aetopia/WinHotKeys/releases/latest).
 2. Create a new file called `WinHotKeys.ini` in the same directory where `WinHotKeys.exe` is present.
-    - Configuration File Reference:    
-        Create a new section with the name of the section being the virtual keycode as an integer, this represents the hotkey to be used.
-        You must have atleast one modifier key to use the desired hotkey.
-        - How to get the desired virtual keycode as an integer?
-            1. Find the keycode value of your desired hotkey from this link:<br>
-                https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-            2. Paste the hexadecimal value of the hotkey in `PowerShell` and hit enter.
-            3. This will return the integer represent of the keycode, use this as the section name.
+    Create a new section with the name of the section being the virtual keycode as an integer, this represents the hotkey to be used.
+    You must have atleast one modifier key to use the desired hotkey.
+    - How to get the desired virtual keycode as an integer?
+        1. Find the keycode value of your desired hotkey from this link:<br>
+            https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+        2. Paste the hexadecimal value of the hotkey in `PowerShell` and hit enter.
+        3. This will return the integer represent of the keycode, use this as the section name.
 
+    - Configuration File Reference:   
         |Key|Configration|
         |-|-|
         |`FileName`|`<Path to File>` \| Point to the file to be launched.|
