@@ -3,6 +3,13 @@
 #include <wtsapi32.h>
 #include <shlwapi.h>
 
+int wtopi_s(const wchar_t *_Str)
+{
+    if (wcsspn(_Str, L"0123456789") != wcslen(_Str))
+        return 0;
+    return _wtoi(_Str);
+}
+
 WCHAR *GetPrivateProfileStringAllocW(LPCWSTR lpAppName, LPCWSTR lpKeyName, LPCWSTR lpDefault, LPCWSTR lpFileName)
 {
     SIZE_T nSize = 0;
@@ -107,7 +114,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nC
                                                           ? MOD_CONTROL
                                                           : 0);
 
-        htHotKeys.uVks[htHotKeys.iCount - 1] = wcslen(lpszSection) ? VkKeyScanW(_wcslwr(lpszSection)[0]) : -1;
+        htHotKeys.uVks[htHotKeys.iCount - 1] = wtopi_s(lpszSection);
         if (htHotKeys.uModifiers[htHotKeys.iCount - 1] ||
             htHotKeys.uVks[htHotKeys.iCount - 1] != -1)
             RegisterHotKey(0, htHotKeys.iCount, htHotKeys.uModifiers[htHotKeys.iCount - 1] | MOD_NOREPEAT, htHotKeys.uVks[htHotKeys.iCount - 1]);
